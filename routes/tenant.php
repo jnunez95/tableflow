@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\TableController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -20,6 +23,22 @@ Route::middleware([
             'laravelVersion' => Application::VERSION,
             'phpVersion' => PHP_VERSION,
             'tenant' => tenant()?->only(['id', 'name']),
+            'tableUuid' => request()->query('table'),
         ]);
     })->name('tenant.welcome');
+
+    Route::get('/menu', function () {
+        return Inertia::render('Menu', [
+            'tableUuid' => request()->query('table'),
+            'tenant' => tenant()?->only(['id', 'name']),
+        ]);
+    })->name('tenant.menu');
+
+    Route::prefix('api')->group(function () {
+        Route::get('/menu/categories', [MenuController::class, 'categories']);
+        Route::get('/menu/products', [MenuController::class, 'products']);
+        Route::get('/menu/products/{product}', [MenuController::class, 'show']);
+        Route::post('/orders', [OrderController::class, 'store']);
+        Route::get('/tables/{table}', [TableController::class, 'show']);
+    });
 });

@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Stancl\Tenancy\Controllers\TenantAssetsController;
+use Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        TenantAssetsController::$tenancyMiddleware = InitializeTenancyBySubdomain::class;
+
+        InitializeTenancyBySubdomain::$onFail = function ($exception, $request, $next) {
+            return $next($request);
+        };
     }
 }

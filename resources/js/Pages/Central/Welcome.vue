@@ -30,10 +30,6 @@ defineProps({
             <h1 class="mt-4 font-display-lg text-display-lg">
                 TableFlow
             </h1>
-            <p class="mt-6 max-w-2xl font-body-lg text-body-lg text-white/80">
-                Automate your restaurant business flow with multi-tenant digital dining experiences,
-                powered by Laravel 13, Inertia, and Filament.
-            </p>
 
             <div class="mt-10 flex flex-wrap gap-4">
                 <Link
@@ -57,10 +53,6 @@ defineProps({
                     Admin Panel
                 </a>
             </div>
-
-            <p class="mt-12 text-sm text-white/40">
-                Laravel v{{ laravelVersion }} · PHP v{{ phpVersion }}
-            </p>
         </div>
     </div>
 </template>

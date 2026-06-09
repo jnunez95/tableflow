@@ -1,5 +1,5 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps({
@@ -7,9 +7,13 @@ const props = defineProps({
         type: Object,
         default: null,
     },
+    tableUuid: {
+        type: String,
+        default: null,
+    },
 });
 
-const selectedLanguage = ref('es');
+const selectedLanguage = ref(localStorage.getItem('tableflow-language') ?? 'es');
 const isVisible = ref(false);
 
 const heroImage = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCt51RRF8Sux4nomaaSnQflNJAHC50vtVWKm9qW0sCISUUqgc5L56qjI_jxsO-xBNv6pgIzei15NfOCrIqCotL8Xy0U-lLbzKArcAUCUNYDFuGuKJTTDYuRqFr9fZNfL2F2XjrewFCr-JNz7K_jv9fLOC5oyMmIYEFgp73HSp1GvwHrMTOQ5hsHkAAuQJtRB2TGHoRlgJ4-clSNXha7sQmU0_McAjdIpM8ASmfVJdoQS91CgccZiDFyCJJMDMjJ-VdeUTVIMOBFWfGP';
@@ -17,7 +21,6 @@ const heroImage = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCt51RRF8S
 const languages = [
     { code: 'en', label: 'English', subtitle: 'English' },
     { code: 'es', label: 'Español', subtitle: 'Spanish' },
-    { code: 'fr', label: 'Français', subtitle: 'French' },
 ];
 
 const copy = {
@@ -45,18 +48,6 @@ const copy = {
         termsOfService: 'Términos de Servicio',
         accessibility: 'Accesibilidad',
     },
-    fr: {
-        pageTitle: 'Bienvenue',
-        callWaiter: 'Appeler le Serveur',
-        tagline: 'Bienvenue à l\'Excellence',
-        headline: 'Un Voyage Culinaire Artistique',
-        description: 'Découvrez un menu méticuleusement conçu pour les palais les plus exigeants.',
-        beginOrder: 'Commencer la Commande',
-        selectLanguage: 'Choisir la Langue',
-        privacyPolicy: 'Politique de Confidentialité',
-        termsOfService: 'Conditions d\'Utilisation',
-        accessibility: 'Accessibilité',
-    },
 };
 
 const restaurantName = props.tenant?.name ?? 'LUMIÈRE DINING';
@@ -64,6 +55,14 @@ const restaurantName = props.tenant?.name ?? 'LUMIÈRE DINING';
 const t = computed(() => copy[selectedLanguage.value] ?? copy.es);
 
 const pageTitle = computed(() => `${restaurantName} | ${t.value.pageTitle}`);
+
+const beginOrder = () => {
+    if (!props.tableUuid) {
+        return;
+    }
+
+    router.visit(route('tenant.menu', { table: props.tableUuid }));
+};
 
 onMounted(() => {
     window.setTimeout(() => {
@@ -101,27 +100,6 @@ onMounted(() => {
             <div class="font-headline-md text-headline-lg-mobile font-semibold tracking-tight text-white md:text-headline-md">
                 {{ restaurantName }}
             </div>
-
-            <div class="flex gap-4">
-                <button
-                    type="button"
-                    data-haptic
-                    class="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-white transition-opacity hover:opacity-80"
-                >
-                    <span class="material-symbols-outlined text-white">notifications</span>
-                    <span class="font-label-lg text-label-lg uppercase tracking-wider">
-                        {{ t.callWaiter }}
-                    </span>
-                </button>
-
-                <button
-                    type="button"
-                    data-haptic
-                    class="rounded-full border border-white/20 p-2 text-white transition-opacity hover:opacity-80"
-                >
-                    <span class="material-symbols-outlined text-white">language</span>
-                </button>
-            </div>
         </header>
 
         <div class="relative z-10 flex w-full max-w-2xl flex-col items-center gap-stack-lg px-margin-mobile text-center">
@@ -144,9 +122,22 @@ onMounted(() => {
                 <button
                     type="button"
                     data-haptic
-                    class="w-full rounded-lg bg-terracotta-accent px-10 py-5 font-headline-md text-headline-lg text-white shadow-lg transition-all duration-200 hover:opacity-90 active:scale-95"
+                    class="w-full rounded-lg bg-terracotta-accent px-10 py-5 font-headline-md text-headline-lg text-white shadow-lg transition-all duration-200 hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="!tableUuid"
+                    @click="beginOrder"
                 >
                     {{ t.beginOrder }}
+                </button>
+
+                <button
+                    type="button"
+                    data-haptic
+                    class="flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-6 py-4 text-white transition-opacity hover:opacity-80"
+                >
+                    <span class="material-symbols-outlined text-white">notifications</span>
+                    <span class="font-label-lg text-label-lg uppercase tracking-wider">
+                        {{ t.callWaiter }}
+                    </span>
                 </button>
             </div>
 
@@ -154,7 +145,7 @@ onMounted(() => {
                 <p class="mb-4 font-label-md text-label-md uppercase tracking-widest text-white/70">
                     {{ t.selectLanguage }}
                 </p>
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-2 gap-3">
                     <button
                         v-for="language in languages"
                         :key="language.code"
@@ -162,7 +153,7 @@ onMounted(() => {
                         data-haptic
                         class="group flex flex-col items-center justify-center rounded-lg border border-white/5 bg-white/10 px-2 py-4 transition-colors hover:bg-white/20"
                         :class="{ 'bg-white/20': selectedLanguage === language.code }"
-                        @click="selectedLanguage = language.code"
+                        @click="selectedLanguage = language.code; localStorage.setItem('tableflow-language', language.code)"
                     >
                         <span class="font-label-lg text-label-lg text-body-lg text-white">{{ language.label }}</span>
                         <span class="mt-1 text-[10px] uppercase text-white/40 group-hover:text-white/60">

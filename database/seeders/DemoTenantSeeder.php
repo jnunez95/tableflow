@@ -30,5 +30,16 @@ class DemoTenantSeeder extends Seeder
                 'domain' => 'demo',
             ]);
         }
+
+        $tenant->run(function (): void {
+            User::query()->firstOrCreate(
+                ['email' => 'admin@tableflow.test'],
+                [
+                    'name' => 'TableFlow Admin',
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                ],
+            );
+        });
     }
 }
