@@ -28,6 +28,7 @@ return [
         '127.0.0.1',
         'localhost',
         'tableflow.test',
+        'tableflow-main-hurveg.laravel.cloud',
     ],
 
     /**
