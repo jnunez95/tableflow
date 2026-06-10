@@ -29,8 +29,8 @@ const copy = {
         reviewBill: 'Review Your Bill',
         tableLabel: 'Table',
         subtotal: 'Subtotal',
-        serviceCharge: 'Service Charge (10%)',
-        salesTax: 'Sales Tax (8.875%)',
+        serviceCharge: 'Service Charge',
+        salesTax: 'Sales Tax',
         totalAmount: 'Total Amount',
         qty: 'Qty',
         footerMessage: 'Please see your server for payment or to request a printed copy. We hope you enjoyed your experience at',
@@ -45,8 +45,8 @@ const copy = {
         reviewBill: 'Revisa tu Cuenta',
         tableLabel: 'Mesa',
         subtotal: 'Subtotal',
-        serviceCharge: 'Cargo por Servicio (10%)',
-        salesTax: 'Impuesto (8.875%)',
+        serviceCharge: 'Cargo por Servicio',
+        salesTax: 'Impuesto',
         totalAmount: 'Total a Pagar',
         qty: 'Cant',
         footerMessage: 'Consulta con tu mesero para el pago o solicita una copia impresa. Esperamos que hayas disfrutado tu experiencia en',
@@ -91,6 +91,32 @@ const currencyFormatter = computed(() => {
 });
 
 const formatMoney = (amount) => currencyFormatter.value.format(Number(amount ?? 0));
+
+const formatRatePercent = (rate) => {
+    const percent = Number(rate ?? 0) * 100;
+
+    return `${parseFloat(percent.toFixed(4))}%`;
+};
+
+const showServiceCharge = computed(() => Number(bill.value?.service_charge_rate ?? 0) > 0);
+
+const showTax = computed(() => Number(bill.value?.tax_rate ?? 0) > 0);
+
+const serviceChargeLabel = computed(() => {
+    if (!showServiceCharge.value) {
+        return t.value.serviceCharge;
+    }
+
+    return `${t.value.serviceCharge} (${formatRatePercent(bill.value.service_charge_rate)})`;
+});
+
+const salesTaxLabel = computed(() => {
+    if (!showTax.value) {
+        return t.value.salesTax;
+    }
+
+    return `${t.value.salesTax} (${formatRatePercent(bill.value.tax_rate)})`;
+});
 
 const fetchJson = async (url) => {
     const response = await fetch(url, {
@@ -280,12 +306,18 @@ onMounted(() => {
                             <span class="font-body-md text-body-md">{{ t.subtotal }}</span>
                             <span class="font-label-lg text-label-lg">{{ formatMoney(bill.subtotal) }}</span>
                         </div>
-                        <div class="flex items-center justify-between text-slate-text">
-                            <span class="font-body-md text-body-md">{{ t.serviceCharge }}</span>
+                        <div
+                            v-if="showServiceCharge"
+                            class="flex items-center justify-between text-slate-text"
+                        >
+                            <span class="font-body-md text-body-md">{{ serviceChargeLabel }}</span>
                             <span class="font-label-lg text-label-lg">{{ formatMoney(bill.service_charge) }}</span>
                         </div>
-                        <div class="flex items-center justify-between text-slate-text">
-                            <span class="font-body-md text-body-md">{{ t.salesTax }}</span>
+                        <div
+                            v-if="showTax"
+                            class="flex items-center justify-between text-slate-text"
+                        >
+                            <span class="font-body-md text-body-md">{{ salesTaxLabel }}</span>
                             <span class="font-label-lg text-label-lg">{{ formatMoney(bill.tax) }}</span>
                         </div>
                         <div class="dotted-line my-6" />

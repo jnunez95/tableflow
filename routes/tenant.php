@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\TableController;
+use App\Models\Company;
+use App\Models\Table as DiningTable;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain;
@@ -16,9 +18,18 @@ Route::middleware([
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
     Route::get('/', function () {
+        $usesQrCode = Company::usesQrCode();
+
         return Inertia::render('Welcome', [
             'tenant' => tenant()?->only(['id', 'name']),
             'tableUuid' => request()->query('table'),
+            'usesQrCode' => $usesQrCode,
+            'tables' => $usesQrCode
+                ? []
+                : DiningTable::query()
+                    ->orderBy('number')
+                    ->get(['uuid', 'number'])
+                    ->values(),
         ]);
     })->name('tenant.welcome');
 

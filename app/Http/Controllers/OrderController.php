@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreOrderRequest;
+use App\Models\Company;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Table as DiningTable;
@@ -14,18 +15,16 @@ use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
-    private const SERVICE_CHARGE_RATE = 0.10;
-
-    private const TAX_RATE = 0.08875;
-
     public function getBillByTable(DiningTable $table): JsonResponse
     {
         $orders = $this->activeOrdersForTable($table);
+        $serviceChargeRate = $this->getActiveServiceChargeRate();
+        $taxRate = $this->getActiveTaxRate();
 
         $aggregatedItems = $this->aggregateBillItems($orders);
         $subtotal = round($aggregatedItems->sum('subtotal'), 2);
-        $serviceCharge = round($subtotal * self::SERVICE_CHARGE_RATE, 2);
-        $tax = round(($subtotal + $serviceCharge) * self::TAX_RATE, 2);
+        $serviceCharge = round($subtotal * $serviceChargeRate, 2);
+        $tax = round(($subtotal + $serviceCharge) * $taxRate, 2);
         $total = round($subtotal + $serviceCharge + $tax, 2);
 
         return response()->json([
@@ -37,9 +36,9 @@ class OrderController extends Controller
                 'items' => $aggregatedItems->values(),
                 'subtotal' => $subtotal,
                 'service_charge' => $serviceCharge,
-                'service_charge_rate' => self::SERVICE_CHARGE_RATE,
+                'service_charge_rate' => $serviceChargeRate,
                 'tax' => $tax,
-                'tax_rate' => self::TAX_RATE,
+                'tax_rate' => $taxRate,
                 'total' => $total,
                 'generated_at' => now()->toIso8601String(),
             ],
@@ -105,8 +104,9 @@ class OrderController extends Controller
             }
 
             $subtotal = round($subtotal, 2);
-            $tax = 0;
-            $total = $subtotal + $tax;
+            $taxRate = $this->getActiveTaxRate();
+            $tax = round($subtotal * $taxRate, 2);
+            $total = round($subtotal + $tax, 2);
 
             $order = Order::query()->create([
                 'table_id' => $table->id,
@@ -127,6 +127,16 @@ class OrderController extends Controller
             'message' => 'Order placed successfully.',
             'data' => $order,
         ], 201);
+    }
+
+    protected function getActiveTaxRate(): float
+    {
+        return Company::activeTaxRate();
+    }
+
+    protected function getActiveServiceChargeRate(): float
+    {
+        return Company::activeServiceChargeRate();
     }
 
     protected function generateOrderNumber(): string

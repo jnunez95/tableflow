@@ -20,6 +20,7 @@ class TenantSeeder extends Seeder
         );
 
         $this->call([
+            CompanySeeder::class,
             MenuDemoSeeder::class,
         ]);
     }

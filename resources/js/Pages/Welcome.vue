@@ -11,9 +11,18 @@ const props = defineProps({
         type: String,
         default: null,
     },
+    usesQrCode: {
+        type: Boolean,
+        default: true,
+    },
+    tables: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const selectedLanguage = ref(localStorage.getItem('tableflow-language') ?? 'es');
+const selectedTableUuid = ref('');
 const isVisible = ref(false);
 
 const heroImage = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCt51RRF8Sux4nomaaSnQflNJAHC50vtVWKm9qW0sCISUUqgc5L56qjI_jxsO-xBNv6pgIzei15NfOCrIqCotL8Xy0U-lLbzKArcAUCUNYDFuGuKJTTDYuRqFr9fZNfL2F2XjrewFCr-JNz7K_jv9fLOC5oyMmIYEFgp73HSp1GvwHrMTOQ5hsHkAAuQJtRB2TGHoRlgJ4-clSNXha7sQmU0_McAjdIpM8ASmfVJdoQS91CgccZiDFyCJJMDMjJ-VdeUTVIMOBFWfGP';
@@ -30,6 +39,8 @@ const copy = {
         headline: 'An Artful Culinary Journey',
         description: 'Experience a meticulously curated menu designed for the discerning palate.',
         beginOrder: 'Begin Order',
+        selectTable: 'Select a Table',
+        tableNumber: 'Table',
         selectLanguage: 'Select Language',
         privacyPolicy: 'Privacy Policy',
         termsOfService: 'Terms of Service',
@@ -41,6 +52,8 @@ const copy = {
         headline: 'Un Viaje Culinario con Arte',
         description: 'Disfruta de un menú cuidadosamente curado para el paladar más exigente.',
         beginOrder: 'Comenzar Orden',
+        selectTable: 'Selecciona una Mesa',
+        tableNumber: 'Mesa',
         selectLanguage: 'Seleccionar Idioma',
         privacyPolicy: 'Política de Privacidad',
         termsOfService: 'Términos de Servicio',
@@ -54,12 +67,22 @@ const t = computed(() => copy[selectedLanguage.value] ?? copy.es);
 
 const pageTitle = computed(() => `${restaurantName} | ${t.value.pageTitle}`);
 
+const activeTableUuid = computed(() => {
+    if (props.usesQrCode) {
+        return props.tableUuid;
+    }
+
+    return selectedTableUuid.value;
+});
+
+const canBeginOrder = computed(() => Boolean(activeTableUuid.value));
+
 const beginOrder = () => {
-    if (!props.tableUuid) {
+    if (!canBeginOrder.value) {
         return;
     }
 
-    router.visit(route('tenant.menu', { table: props.tableUuid }));
+    router.visit(route('tenant.menu', { table: activeTableUuid.value }));
 };
 
 onMounted(() => {
@@ -117,11 +140,44 @@ onMounted(() => {
             </div>
 
             <div class="mt-8 flex w-full max-w-sm flex-col gap-stack-md">
+                <div
+                    v-if="!usesQrCode"
+                    class="glass-panel w-full rounded-xl p-6"
+                >
+                    <p class="mb-4 font-label-md text-label-md uppercase tracking-widest text-white/70">
+                        {{ t.selectTable }}
+                    </p>
+                    <div class="relative">
+                        <select
+                            v-model="selectedTableUuid"
+                            class="min-h-12 w-full cursor-pointer appearance-none rounded-lg border border-white/10 bg-white/10 py-3 pl-4 pr-12 font-body-lg text-body-lg text-white transition hover:bg-white/20 focus:border-terracotta-accent focus:outline-none focus:ring-2 focus:ring-terracotta-accent/30"
+                        >
+                            <option value="" disabled>
+                                {{ t.selectTable }}
+                            </option>
+                            <option
+                                v-for="table in tables"
+                                :key="table.uuid"
+                                :value="table.uuid"
+                                class="text-deep-navy"
+                            >
+                                {{ t.tableNumber }} {{ table.number }}
+                            </option>
+                        </select>
+                        <span
+                            class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-white/70"
+                            aria-hidden="true"
+                        >
+                            <span class="material-symbols-outlined text-xl">expand_more</span>
+                        </span>
+                    </div>
+                </div>
+
                 <button
                     type="button"
                     data-haptic
                     class="w-full rounded-lg bg-terracotta-accent px-10 py-5 font-headline-md text-headline-lg text-white shadow-lg transition-all duration-200 hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-                    :disabled="!tableUuid"
+                    :disabled="!canBeginOrder"
                     @click="beginOrder"
                 >
                     {{ t.beginOrder }}
