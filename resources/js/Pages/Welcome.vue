@@ -26,7 +26,6 @@ const languages = [
 const copy = {
     en: {
         pageTitle: 'Welcome',
-        callWaiter: 'Call Waiter',
         tagline: 'Welcome to Excellence',
         headline: 'An Artful Culinary Journey',
         description: 'Experience a meticulously curated menu designed for the discerning palate.',
@@ -38,7 +37,6 @@ const copy = {
     },
     es: {
         pageTitle: 'Bienvenida',
-        callWaiter: 'Llamar Mesero',
         tagline: 'Bienvenido a la Excelencia',
         headline: 'Un Viaje Culinario con Arte',
         description: 'Disfruta de un menú cuidadosamente curado para el paladar más exigente.',
@@ -127,17 +125,6 @@ onMounted(() => {
                     @click="beginOrder"
                 >
                     {{ t.beginOrder }}
-                </button>
-
-                <button
-                    type="button"
-                    data-haptic
-                    class="flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-6 py-4 text-white transition-opacity hover:opacity-80"
-                >
-                    <span class="material-symbols-outlined text-white">notifications</span>
-                    <span class="font-label-lg text-label-lg uppercase tracking-wider">
-                        {{ t.callWaiter }}
-                    </span>
                 </button>
             </div>
 

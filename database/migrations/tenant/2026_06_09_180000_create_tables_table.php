@@ -12,12 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('uuid', 6)->unique();
             $table->unsignedInteger('number')->unique();
-            $table->unsignedInteger('capacity')->nullable();
-            $table->string('status')->default('available');
             $table->string('qr_code')->nullable()->unique();
             $table->timestamps();
-
-            $table->index('status');
         });
     }
 

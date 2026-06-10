@@ -27,16 +27,19 @@ const successMessage = ref('');
 const tableInfo = ref(null);
 const selectedLanguage = ref(localStorage.getItem('tableflow-language') ?? 'es');
 
+const languageOptions = [
+    { value: 'en', label: 'English' },
+    { value: 'es', label: 'Spanish' },
+];
+
 const copy = {
     en: {
         orderTotal: 'Order Total',
         item: 'item selected',
         items: 'items selected',
-        callWaiter: 'Call Waiter',
         completeOrder: 'Complete Order',
         submitting: 'Submitting...',
         closeBill: 'Close Bill',
-        waiterCalled: 'Waiter has been notified.',
         closeBillMessage: 'Please ask your waiter to close the bill.',
         noDishes: 'No dishes available',
         noDishesHint: 'Check back soon or choose another category.',
@@ -45,11 +48,9 @@ const copy = {
         orderTotal: 'Total de la Orden',
         item: 'artículo seleccionado',
         items: 'artículos seleccionados',
-        callWaiter: 'Llamar Mesero',
         completeOrder: 'Completar Orden',
         submitting: 'Enviando...',
         closeBill: 'Cerrar Cuenta',
-        waiterCalled: 'El mesero ha sido notificado.',
         closeBillMessage: 'Solicita al mesero cerrar la cuenta.',
         noDishes: 'No hay platos disponibles',
         noDishesHint: 'Vuelve pronto o elige otra categoría.',
@@ -241,18 +242,13 @@ const completeOrder = async () => {
     }
 };
 
-const callWaiter = () => {
-    successMessage.value = t.value.waiterCalled;
-};
-
 const closeBill = () => {
     successMessage.value = t.value.closeBillMessage;
 };
 
-const toggleLanguage = () => {
-    selectedLanguage.value = selectedLanguage.value === 'es' ? 'en' : 'es';
-    localStorage.setItem('tableflow-language', selectedLanguage.value);
-};
+watch(selectedLanguage, (language) => {
+    localStorage.setItem('tableflow-language', language);
+});
 
 watch(activeCategory, async (categoryId) => {
     isLoading.value = true;
@@ -297,14 +293,28 @@ onMounted(() => {
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <button
-                            type="button"
-                            class="flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant text-deep-navy transition hover:bg-soft-blue-gray/40"
-                            :title="selectedLanguage === 'es' ? 'Switch to English' : 'Cambiar a Español'"
-                            @click="toggleLanguage"
-                        >
-                            <span class="material-symbols-outlined text-base">translate</span>
-                        </button>
+                        <label for="menu-language" class="sr-only">Language</label>
+                        <div class="relative">
+                            <select
+                                id="menu-language"
+                                v-model="selectedLanguage"
+                                class="min-h-12 min-w-[9.5rem] w-full cursor-pointer appearance-none rounded-lg border border-outline-variant bg-white !bg-none py-2 pl-4 pr-12 font-body-lg text-body-lg text-deep-navy transition hover:bg-soft-blue-gray/40 focus:border-terracotta-accent focus:outline-none focus:ring-2 focus:ring-terracotta-accent/30"
+                            >
+                                <option
+                                    v-for="option in languageOptions"
+                                    :key="option.value"
+                                    :value="option.value"
+                                >
+                                    {{ option.label }}
+                                </option>
+                            </select>
+                            <span
+                                class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-deep-navy"
+                                aria-hidden="true"
+                            >
+                                <span class="material-symbols-outlined text-xl">expand_more</span>
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -364,7 +374,7 @@ onMounted(() => {
                     :key="section.category.id"
                     class="space-y-stack-md"
                 >
-                    <h2 class="font-headline-md text-headline-md text-deep-navy">
+                    <h2 class="font-headline-lg text-headline-lg text-deep-navy">
                         {{ section.category.name }}
                     </h2>
 
@@ -390,7 +400,6 @@ onMounted(() => {
             :success-message="successMessage"
             :labels="t"
             @complete="completeOrder"
-            @call-waiter="callWaiter"
             @close-bill="closeBill"
         />
     </div>

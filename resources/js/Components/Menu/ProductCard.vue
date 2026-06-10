@@ -54,6 +54,7 @@ const primaryTag = () => props.product.dietary_tags?.[0] ?? null;
                 :src="product.image || placeholderImage"
                 :alt="product.name"
                 class="h-full w-full object-cover"
+                @error="($event.target).src = placeholderImage"
             >
 
             <span

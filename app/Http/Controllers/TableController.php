@@ -13,8 +13,6 @@ class TableController extends Controller
             'data' => [
                 'uuid' => $table->uuid,
                 'number' => $table->number,
-                'capacity' => $table->capacity,
-                'status' => $table->status,
             ],
         ]);
     }

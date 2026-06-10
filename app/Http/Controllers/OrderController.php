@@ -17,12 +17,6 @@ class OrderController extends Controller
     {
         $table = DiningTable::query()->where('uuid', $request->validated('table_uuid'))->firstOrFail();
 
-        if (! in_array($table->status, [DiningTable::STATUS_AVAILABLE, DiningTable::STATUS_OCCUPIED], true)) {
-            throw ValidationException::withMessages([
-                'table_uuid' => ['This table is not available for ordering.'],
-            ]);
-        }
-
         $items = collect($request->validated('items'));
         $productIds = $items->pluck('product_id')->unique()->values();
 
@@ -73,10 +67,6 @@ class OrderController extends Controller
             ]);
 
             $order->items()->createMany($orderItems);
-
-            if ($table->status === DiningTable::STATUS_AVAILABLE) {
-                $table->update(['status' => DiningTable::STATUS_OCCUPIED]);
-            }
 
             return $order->load(['items.product:id,name,price', 'table:id,number']);
         });

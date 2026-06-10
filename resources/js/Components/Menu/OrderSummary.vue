@@ -24,7 +24,7 @@ const props = defineProps({
     },
 });
 
-defineEmits(['complete', 'call-waiter', 'close-bill']);
+defineEmits(['complete', 'close-bill']);
 
 const formattedTotal = computed(() => {
     return new Intl.NumberFormat('en-US', {
@@ -64,15 +64,6 @@ const formattedTotal = computed(() => {
             </div>
 
             <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-                <button
-                    type="button"
-                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-terracotta-accent bg-white px-5 py-3 font-label-lg text-label-lg text-terracotta-accent transition hover:bg-soft-blue-gray/30 active:scale-95"
-                    @click="$emit('call-waiter')"
-                >
-                    <span class="material-symbols-outlined text-base">notifications</span>
-                    {{ labels.callWaiter }}
-                </button>
-
                 <button
                     type="button"
                     class="inline-flex items-center justify-center gap-2 rounded-lg bg-terracotta-accent px-6 py-3 font-label-lg text-label-lg uppercase tracking-wider text-white transition hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"

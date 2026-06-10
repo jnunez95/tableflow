@@ -14,10 +14,10 @@ defineEmits(['select']);
 </script>
 
 <template>
-    <nav class="hidden items-center gap-8 md:flex">
+    <nav class="hidden items-center gap-6 lg:gap-8 md:flex">
         <button
             type="button"
-            class="border-b-2 pb-1 font-label-lg text-label-lg transition hover:text-terracotta-accent"
+            class="min-h-12 border-b-[3px] px-1 py-2 font-headline-md text-headline-md font-semibold transition hover:text-terracotta-accent"
             :class="activeCategory === null
                 ? 'border-terracotta-accent text-terracotta-accent'
                 : 'border-transparent text-deep-navy'"
@@ -30,7 +30,7 @@ defineEmits(['select']);
             v-for="category in categories"
             :key="category.id"
             type="button"
-            class="border-b-2 pb-1 font-label-lg text-label-lg transition hover:text-terracotta-accent"
+            class="min-h-12 border-b-[3px] px-1 py-2 font-headline-md text-headline-md font-semibold transition hover:text-terracotta-accent"
             :class="activeCategory === category.id
                 ? 'border-terracotta-accent text-terracotta-accent'
                 : 'border-transparent text-deep-navy'"
@@ -44,10 +44,10 @@ defineEmits(['select']);
         <div class="flex min-w-max gap-3">
             <button
                 type="button"
-                class="rounded-full px-5 py-2 font-label-lg text-label-lg transition active:scale-95"
+                class="min-h-12 rounded-full px-6 py-3 font-headline-md text-headline-md font-semibold transition active:scale-95"
                 :class="activeCategory === null
                     ? 'bg-terracotta-accent text-white'
-                    : 'border border-outline-variant text-slate-text'"
+                    : 'border-2 border-outline text-deep-navy'"
                 @click="$emit('select', null)"
             >
                 All
@@ -57,10 +57,10 @@ defineEmits(['select']);
                 v-for="category in categories"
                 :key="category.id"
                 type="button"
-                class="rounded-full px-5 py-2 font-label-lg text-label-lg transition active:scale-95"
+                class="min-h-12 rounded-full px-6 py-3 font-headline-md text-headline-md font-semibold transition active:scale-95"
                 :class="activeCategory === category.id
                     ? 'bg-terracotta-accent text-white'
-                    : 'border border-outline-variant text-slate-text'"
+                    : 'border-2 border-outline text-deep-navy'"
                 @click="$emit('select', category.id)"
             >
                 {{ category.name }}

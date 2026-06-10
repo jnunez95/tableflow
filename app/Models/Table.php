@@ -8,17 +8,9 @@ use Illuminate\Support\Str;
 
 class Table extends Model
 {
-    public const STATUS_AVAILABLE = 'available';
-
-    public const STATUS_OCCUPIED = 'occupied';
-
-    public const STATUS_RESERVED = 'reserved';
-
     protected $fillable = [
         'uuid',
         'number',
-        'capacity',
-        'status',
         'qr_code',
     ];
 
@@ -26,7 +18,6 @@ class Table extends Model
     {
         return [
             'number' => 'integer',
-            'capacity' => 'integer',
         ];
     }
 

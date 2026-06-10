@@ -29,7 +29,10 @@ return [
     |
     */
 
-    'middleware' => ['web'],
+    'middleware' => [
+        'web',
+        \App\Http\Middleware\PreventPlatformAuthOnTenants::class,
+    ],
 
     'auth_session' => AuthenticateSession::class,
 
