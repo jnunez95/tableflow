@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\TableController;
+use App\Http\Controllers\KitchenController;
 use App\Models\Company;
 use App\Models\Table as DiningTable;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,12 @@ Route::middleware([
         ]);
     })->name('tenant.bill');
 
+    Route::get('/kitchen', function () {
+        return Inertia::render('Kitchen', [
+            'tenant' => tenant()?->only(['id', 'name']),
+        ]);
+    })->name('tenant.kitchen');
+
     Route::get('/order/verify', function () {
         return redirect()->route('tenant.menu', [
             'table' => request()->query('table'),
@@ -69,5 +76,8 @@ Route::middleware([
         Route::get('/tables/{table}', [TableController::class, 'show']);
         Route::get('/tables/{table}/bill', [OrderController::class, 'getBillByTable']);
         Route::post('/tables/{table}/close-bill', [OrderController::class, 'closeBillByTable']);
+        Route::get('/kitchen/orders', [KitchenController::class, 'index']);
+        Route::put('/kitchen/orders/{order}/ready', [KitchenController::class, 'markOrderReady']);
+        Route::put('/kitchen/items/{item}/toggle', [KitchenController::class, 'toggleItemReady']);
     });
 });

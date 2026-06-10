@@ -100,6 +100,7 @@ class OrderController extends Controller
                     'unit_price' => $unitPrice,
                     'subtotal' => $lineSubtotal,
                     'notes' => $item['notes'] ?? null,
+                    'cooking_method' => $this->determineCookingMethod($product),
                 ];
             }
 
@@ -197,5 +198,29 @@ class OrderController extends Controller
         }
 
         return $items->sortBy('category_name')->values();
+    }
+
+    protected function determineCookingMethod(Product $product): ?string
+    {
+        $category = strtolower($product->category?->name ?? '');
+        $name = strtolower($product->name);
+
+        if (str_contains($name, 'salad') || str_contains($category, 'salad') || str_contains($category, 'ensalada')) {
+            return 'COLD';
+        }
+
+        if (str_contains($name, 'steak') || str_contains($name, 'beef') || str_contains($name, 'wellington') || str_contains($category, 'grill')) {
+            return 'GRILL';
+        }
+
+        if (str_contains($category, 'soup') || str_contains($name, 'soup') || str_contains($name, 'bisque') || str_contains($name, 'scallop')) {
+            return 'HOT';
+        }
+
+        if (str_contains($name, 'sauce') || str_contains($name, 'reduction') || str_contains($name, 'wine')) {
+            return 'SAUCE';
+        }
+
+        return 'PREP';
     }
 }

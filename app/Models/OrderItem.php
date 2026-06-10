@@ -14,6 +14,8 @@ class OrderItem extends Model
         'unit_price',
         'subtotal',
         'notes',
+        'is_ready',
+        'cooking_method',
     ];
 
     protected function casts(): array
@@ -24,6 +26,7 @@ class OrderItem extends Model
             'quantity' => 'integer',
             'unit_price' => 'decimal:2',
             'subtotal' => 'decimal:2',
+            'is_ready' => 'boolean',
         ];
     }
 
