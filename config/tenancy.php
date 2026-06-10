@@ -29,6 +29,7 @@ return [
         'localhost',
         'tableflow.test',
         'tableflow-main-hurveg.laravel.cloud',
+        'octapusflow.com'
     ],
 
     /**
