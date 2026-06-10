@@ -11,10 +11,17 @@ defineProps({
 });
 
 defineEmits(['select']);
+
+const mobileButtonClass = (isActive) => [
+    'w-full min-h-11 rounded-lg px-3 py-2 font-label-lg text-label-lg font-semibold transition active:scale-95',
+    isActive
+        ? 'bg-terracotta-accent text-white'
+        : 'border border-outline-variant bg-white text-deep-navy',
+];
 </script>
 
 <template>
-    <nav class="hidden items-center gap-6 lg:gap-8 md:flex">
+    <nav class="hidden items-center gap-6 md:flex lg:gap-8">
         <button
             type="button"
             class="min-h-12 border-b-[3px] px-1 py-2 font-headline-md text-headline-md font-semibold transition hover:text-terracotta-accent"
@@ -40,31 +47,23 @@ defineEmits(['select']);
         </button>
     </nav>
 
-    <div class="overflow-x-auto pb-1 md:hidden">
-        <div class="flex min-w-max gap-3">
-            <button
-                type="button"
-                class="min-h-12 rounded-full px-6 py-3 font-headline-md text-headline-md font-semibold transition active:scale-95"
-                :class="activeCategory === null
-                    ? 'bg-terracotta-accent text-white'
-                    : 'border-2 border-outline text-deep-navy'"
-                @click="$emit('select', null)"
-            >
-                All
-            </button>
+    <div class="grid grid-cols-2 gap-2 md:hidden">
+        <button
+            type="button"
+            :class="mobileButtonClass(activeCategory === null)"
+            @click="$emit('select', null)"
+        >
+            All
+        </button>
 
-            <button
-                v-for="category in categories"
-                :key="category.id"
-                type="button"
-                class="min-h-12 rounded-full px-6 py-3 font-headline-md text-headline-md font-semibold transition active:scale-95"
-                :class="activeCategory === category.id
-                    ? 'bg-terracotta-accent text-white'
-                    : 'border-2 border-outline text-deep-navy'"
-                @click="$emit('select', category.id)"
-            >
-                {{ category.name }}
-            </button>
-        </div>
+        <button
+            v-for="category in categories"
+            :key="category.id"
+            type="button"
+            :class="mobileButtonClass(activeCategory === category.id)"
+            @click="$emit('select', category.id)"
+        >
+            {{ category.name }}
+        </button>
     </div>
 </template>

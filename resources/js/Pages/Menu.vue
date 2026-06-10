@@ -90,16 +90,6 @@ const visibleSections = computed(() => {
 
 const getQuantity = (productId) => selectedItems.value[productId]?.quantity ?? 0;
 
-const layoutForCategory = (category) => {
-    return ['platos-fuertes', 'main-courses'].includes(category.slug) ? 'horizontal' : 'vertical';
-};
-
-const gridClassForCategory = (category) => {
-    return layoutForCategory(category) === 'horizontal'
-        ? 'grid grid-cols-1 gap-gutter xl:grid-cols-2'
-        : 'grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-3';
-};
-
 const fetchJson = async (url) => {
     const response = await fetch(url, {
         headers: {
@@ -382,13 +372,12 @@ onMounted(() => {
                         {{ section.category.name }}
                     </h2>
 
-                    <div :class="gridClassForCategory(section.category)">
+                    <div class="grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-3">
                         <ProductCard
                             v-for="product in section.products"
                             :key="product.id"
                             :product="product"
                             :quantity="getQuantity(product.id)"
-                            :layout="layoutForCategory(section.category)"
                             @add="addItem"
                             @remove="removeItem"
                         />
