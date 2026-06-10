@@ -180,7 +180,7 @@ const closeAccount = async () => {
             throw new Error(payload?.message ?? t.value.closeError);
         }
 
-        router.visit(route('tenant.menu', { table: props.tableUuid }));
+        router.visit(route('tenant.welcome', { table: props.tableUuid }));
     } catch (error) {
         errorMessage.value = error.message ?? t.value.closeError;
         isClosing.value = false;
