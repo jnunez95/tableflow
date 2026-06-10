@@ -20,6 +20,7 @@ const categories = ref([]);
 const products = ref([]);
 const activeCategory = ref(null);
 const selectedItems = ref({});
+const cartStorageKey = computed(() => `tableflow-cart-${props.tableUuid}`);
 const isLoading = ref(true);
 const isSubmitting = ref(false);
 const errorMessage = ref('');
@@ -90,6 +91,46 @@ const visibleSections = computed(() => {
 
 const getQuantity = (productId) => selectedItems.value[productId]?.quantity ?? 0;
 
+const persistCart = () => {
+    if (!props.tableUuid) {
+        return;
+    }
+
+    localStorage.setItem(cartStorageKey.value, JSON.stringify(selectedItems.value));
+};
+
+const restoreCart = () => {
+    if (!props.tableUuid) {
+        return;
+    }
+
+    const storedCart = localStorage.getItem(cartStorageKey.value);
+
+    if (!storedCart) {
+        return;
+    }
+
+    try {
+        const parsed = JSON.parse(storedCart);
+        selectedItems.value = Object.fromEntries(
+            Object.entries(parsed).filter(([, item]) => item?.product && item.quantity > 0),
+        );
+    } catch {
+        selectedItems.value = {};
+    }
+};
+
+const restoreSuccessMessage = () => {
+    const message = localStorage.getItem('tableflow-order-success-message');
+
+    if (!message) {
+        return;
+    }
+
+    successMessage.value = message;
+    localStorage.removeItem('tableflow-order-success-message');
+};
+
 const fetchJson = async (url) => {
     const response = await fetch(url, {
         headers: {
@@ -154,6 +195,8 @@ const addItem = (product) => {
             quantity: (current?.quantity ?? 0) + 1,
         },
     };
+
+    persistCart();
 };
 
 const removeItem = (productId) => {
@@ -169,6 +212,7 @@ const removeItem = (productId) => {
         const next = { ...selectedItems.value };
         delete next[productId];
         selectedItems.value = next;
+        persistCart();
         return;
     }
 
@@ -179,9 +223,11 @@ const removeItem = (productId) => {
             quantity: current.quantity - 1,
         },
     };
+
+    persistCart();
 };
 
-const completeOrder = async () => {
+const completeOrder = () => {
     if (!props.tableUuid) {
         errorMessage.value = 'Table reference is missing.';
         return;
@@ -194,42 +240,22 @@ const completeOrder = async () => {
     isSubmitting.value = true;
     errorMessage.value = '';
     successMessage.value = '';
+    persistCart();
 
-    try {
-        const response = await fetch('/api/orders', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '',
-            },
-            body: JSON.stringify({
-                table_uuid: props.tableUuid,
-                items: selectedList.value.map((item) => ({
-                    product_id: item.product.id,
-                    quantity: item.quantity,
-                })),
-            }),
-        });
-
-        const payload = await response.json();
-
-        if (!response.ok) {
-            const validationMessage = payload?.errors
-                ? Object.values(payload.errors).flat()[0]
-                : payload?.message;
-
-            throw new Error(validationMessage ?? 'Unable to complete order.');
-        }
-
-        selectedItems.value = {};
-        successMessage.value = payload.message ?? t.value.completeOrder;
-    } catch (error) {
-        errorMessage.value = error.message ?? 'Unable to complete order.';
-    } finally {
-        isSubmitting.value = false;
-    }
+    router.visit(route('tenant.order.verify'), {
+        method: 'post',
+        data: {
+            table_uuid: props.tableUuid,
+            items: selectedList.value.map((item) => ({
+                product_id: item.product.id,
+                product: item.product,
+                quantity: item.quantity,
+            })),
+        },
+        onFinish: () => {
+            isSubmitting.value = false;
+        },
+    });
 };
 
 const closeBill = () => {
@@ -263,6 +289,8 @@ onMounted(() => {
         return;
     }
 
+    restoreCart();
+    restoreSuccessMessage();
     initializeMenu();
 });
 </script>

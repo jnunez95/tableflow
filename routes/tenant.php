@@ -47,6 +47,20 @@ Route::middleware([
         ]);
     })->name('tenant.bill');
 
+    Route::get('/order/verify', function () {
+        return redirect()->route('tenant.menu', [
+            'table' => request()->query('table'),
+        ]);
+    })->name('tenant.order.verify.redirect');
+
+    Route::post('/order/verify', function () {
+        return Inertia::render('OrderVerify', [
+            'tableUuid' => request()->input('table_uuid'),
+            'tenant' => tenant()?->only(['id', 'name']),
+            'items' => request()->input('items', []),
+        ]);
+    })->name('tenant.order.verify');
+
     Route::prefix('api')->group(function () {
         Route::get('/menu/categories', [MenuController::class, 'categories']);
         Route::get('/menu/products', [MenuController::class, 'products']);
