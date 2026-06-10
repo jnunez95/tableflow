@@ -243,7 +243,11 @@ const completeOrder = async () => {
 };
 
 const closeBill = () => {
-    successMessage.value = t.value.closeBillMessage;
+    if (!props.tableUuid) {
+        return;
+    }
+
+    router.visit(route('tenant.bill', { table: props.tableUuid }));
 };
 
 watch(selectedLanguage, (language) => {

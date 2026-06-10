@@ -29,11 +29,20 @@ Route::middleware([
         ]);
     })->name('tenant.menu');
 
+    Route::get('/bill', function () {
+        return Inertia::render('Resume', [
+            'tableUuid' => request()->query('table'),
+            'tenant' => tenant()?->only(['id', 'name']),
+        ]);
+    })->name('tenant.bill');
+
     Route::prefix('api')->group(function () {
         Route::get('/menu/categories', [MenuController::class, 'categories']);
         Route::get('/menu/products', [MenuController::class, 'products']);
         Route::get('/menu/products/{product}', [MenuController::class, 'show']);
         Route::post('/orders', [OrderController::class, 'store']);
         Route::get('/tables/{table}', [TableController::class, 'show']);
+        Route::get('/tables/{table}/bill', [OrderController::class, 'getBillByTable']);
+        Route::post('/tables/{table}/close-bill', [OrderController::class, 'closeBillByTable']);
     });
 });

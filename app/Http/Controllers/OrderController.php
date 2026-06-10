@@ -7,12 +7,64 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Table as DiningTable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
+    private const SERVICE_CHARGE_RATE = 0.10;
+
+    private const TAX_RATE = 0.08875;
+
+    public function getBillByTable(DiningTable $table): JsonResponse
+    {
+        $orders = $this->activeOrdersForTable($table);
+
+        $aggregatedItems = $this->aggregateBillItems($orders);
+        $subtotal = round($aggregatedItems->sum('subtotal'), 2);
+        $serviceCharge = round($subtotal * self::SERVICE_CHARGE_RATE, 2);
+        $tax = round(($subtotal + $serviceCharge) * self::TAX_RATE, 2);
+        $total = round($subtotal + $serviceCharge + $tax, 2);
+
+        return response()->json([
+            'data' => [
+                'table' => [
+                    'uuid' => $table->uuid,
+                    'number' => $table->number,
+                ],
+                'items' => $aggregatedItems->values(),
+                'subtotal' => $subtotal,
+                'service_charge' => $serviceCharge,
+                'service_charge_rate' => self::SERVICE_CHARGE_RATE,
+                'tax' => $tax,
+                'tax_rate' => self::TAX_RATE,
+                'total' => $total,
+                'generated_at' => now()->toIso8601String(),
+            ],
+        ]);
+    }
+
+    public function closeBillByTable(DiningTable $table): JsonResponse
+    {
+        $closedCount = DB::transaction(function () use ($table) {
+            return Order::query()
+                ->where('table_id', $table->id)
+                ->whereNotIn('status', [Order::STATUS_CANCELLED, Order::STATUS_COMPLETED])
+                ->update(['status' => Order::STATUS_COMPLETED]);
+        });
+
+        return response()->json([
+            'message' => $closedCount > 0
+                ? 'Account closed successfully.'
+                : 'No active orders to close.',
+            'data' => [
+                'closed_orders_count' => $closedCount,
+            ],
+        ]);
+    }
+
     public function store(StoreOrderRequest $request): JsonResponse
     {
         $table = DiningTable::query()->where('uuid', $request->validated('table_uuid'))->firstOrFail();
@@ -84,5 +136,56 @@ class OrderController extends Controller
         } while (Order::query()->where('order_number', $orderNumber)->exists());
 
         return $orderNumber;
+    }
+
+    protected function activeOrdersForTable(DiningTable $table): Collection
+    {
+        return Order::query()
+            ->where('table_id', $table->id)
+            ->whereNotIn('status', [Order::STATUS_CANCELLED, Order::STATUS_COMPLETED])
+            ->with([
+                'items.product.category:id,name,slug',
+            ])
+            ->orderBy('created_at')
+            ->get();
+    }
+
+    protected function aggregateBillItems(Collection $orders): Collection
+    {
+        $items = collect();
+
+        foreach ($orders as $order) {
+            foreach ($order->items as $item) {
+                $product = $item->product;
+
+                if ($product === null) {
+                    continue;
+                }
+
+                $existingKey = $items->search(fn (array $entry) => $entry['product_id'] === $product->id);
+
+                if ($existingKey !== false) {
+                    $existing = $items->get($existingKey);
+                    $existing['quantity'] += $item->quantity;
+                    $existing['subtotal'] = round($existing['subtotal'] + (float) $item->subtotal, 2);
+                    $items->put($existingKey, $existing);
+
+                    continue;
+                }
+
+                $items->push([
+                    'product_id' => $product->id,
+                    'category_name' => $product->category?->name ?? 'Other',
+                    'category_slug' => $product->category?->slug,
+                    'product_name' => $product->name,
+                    'description' => $product->description,
+                    'quantity' => $item->quantity,
+                    'unit_price' => (float) $item->unit_price,
+                    'subtotal' => (float) $item->subtotal,
+                ]);
+            }
+        }
+
+        return $items->sortBy('category_name')->values();
     }
 }
