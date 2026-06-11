@@ -35,35 +35,31 @@ const languages = [
 const copy = {
     en: {
         pageTitle: 'Welcome',
-        tagline: 'Welcome to Excellence',
+        taglinePrefix: 'Welcome to',
         headline: 'An Artful Culinary Journey',
         description: 'Experience a meticulously curated menu designed for the discerning palate.',
         beginOrder: 'Begin Order',
         selectTable: 'Select a Table',
         tableNumber: 'Table',
         selectLanguage: 'Select Language',
-        privacyPolicy: 'Privacy Policy',
-        termsOfService: 'Terms of Service',
-        accessibility: 'Accessibility',
     },
     es: {
         pageTitle: 'Bienvenida',
-        tagline: 'Bienvenido a la Excelencia',
+        taglinePrefix: 'Bienvenido a',
         headline: 'Un Viaje Culinario con Arte',
         description: 'Disfruta de un menú cuidadosamente curado para el paladar más exigente.',
         beginOrder: 'Comenzar Orden',
         selectTable: 'Selecciona una Mesa',
         tableNumber: 'Mesa',
         selectLanguage: 'Seleccionar Idioma',
-        privacyPolicy: 'Política de Privacidad',
-        termsOfService: 'Términos de Servicio',
-        accessibility: 'Accesibilidad',
     },
 };
 
 const restaurantName = props.tenant?.name ?? 'LUMIÈRE DINING';
 
 const t = computed(() => copy[selectedLanguage.value] ?? copy.es);
+
+const welcomeTagline = computed(() => `${t.value.taglinePrefix} ${restaurantName}`);
 
 const pageTitle = computed(() => `${restaurantName} | ${t.value.pageTitle}`);
 
@@ -117,19 +113,13 @@ onMounted(() => {
             <div class="absolute inset-0 hero-gradient" />
         </div>
 
-        <header class="absolute left-0 top-0 z-20 flex h-24 w-full items-center justify-between px-margin-mobile md:px-margin-desktop">
-            <div class="font-headline-md text-headline-lg-mobile font-semibold tracking-tight text-white md:text-headline-md">
-                {{ restaurantName }}
-            </div>
-        </header>
-
         <div class="relative z-10 flex w-full max-w-2xl flex-col items-center gap-stack-lg px-margin-mobile text-center">
             <div
                 class="animate-fade-in space-y-4 transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
                 :class="isVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'"
             >
                 <span class="font-label-lg text-label-lg uppercase tracking-[0.2em] text-white/60">
-                    {{ t.tagline }}
+                    {{ welcomeTagline }}
                 </span>
                 <h1 class="font-display-lg text-display-lg leading-tight text-white">
                     {{ t.headline }}
@@ -206,17 +196,5 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-
-        <footer class="absolute bottom-10 left-0 z-10 flex w-full justify-center px-margin-mobile">
-            <div class="flex items-center gap-6 font-label-md text-label-md text-white/50">
-                <span class="cursor-pointer transition-colors hover:text-white">{{ t.privacyPolicy }}</span>
-                <span class="h-1 w-1 rounded-full bg-white/20" />
-                <span class="cursor-pointer transition-colors hover:text-white">{{ t.termsOfService }}</span>
-                <span class="h-1 w-1 rounded-full bg-white/20" />
-                <span class="cursor-pointer transition-colors hover:text-white">{{ t.accessibility }}</span>
-            </div>
-        </footer>
-
-        <div class="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-transparent via-terracotta-accent to-transparent opacity-50" />
     </main>
 </template>
