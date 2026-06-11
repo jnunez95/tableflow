@@ -20,7 +20,7 @@ class TopProductsWidget extends TableWidget
 
     protected int|string|array $columnSpan = 'full';
 
-    protected static ?string $heading = 'Top 10 products';
+    protected static ?string $heading = 'Top 10 best sellers';
 
     protected ?string $pollingInterval = '60s';
 
