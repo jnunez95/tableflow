@@ -24,13 +24,18 @@ return [
      *
      * Only relevant if you're using the domain or subdomain identification middleware.
      */
-    'central_domains' => [
-        '127.0.0.1',
-        'localhost',
-        'tableflow.test',
-        'tableflow-main-hurveg.laravel.cloud',
-        'octapusflow.com'
-    ],
+    'central_domains' => array_values(array_unique(array_filter(array_merge(
+        [
+            '127.0.0.1',
+            'localhost',
+            'tableflow.test',
+            'tableflow-main-hurveg.laravel.cloud',
+            'octapusflow.com',
+        ],
+        array_filter([
+            parse_url((string) env('APP_URL', ''), PHP_URL_HOST) ?: null,
+        ]),
+    )))),
 
     /**
      * Tenancy bootstrappers are executed when tenancy is initialized.
