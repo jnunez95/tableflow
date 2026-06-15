@@ -26,7 +26,7 @@ DB_HOST=<mysql-host-interno-coolify>
 DB_PORT=3306
 DB_DATABASE=tableflow_central
 DB_USERNAME=root
-DB_PASSWORD=<password>
+DB_PASSWORD=<password>          # usar is_literal=true si tiene $ u otros caracteres especiales
 
 SESSION_DRIVER=database
 CACHE_STORE=database
@@ -51,6 +51,9 @@ Si usas Colima, en **Servers → localhost** pon **SSH port = 2222**.
 - Corrige el crash `duplicate location "/"` del build Nixpacks por defecto
 - Incluye `fastcgi_buffer_size 8k` para Inertia.js
 
-## Redeploy
+## Notas importantes
+
+- **Tenancy:** `APP_URL` debe coincidir con el dominio de Coolify. El host se añade automáticamente a `central_domains` vía `config/tenancy.php`.
+- **Contraseñas con `$`:** en Coolify marca `DB_PASSWORD` como **literal** para evitar que Docker Compose trunque valores como `$7`.
 
 Tras push a `main`, haz **Redeploy** en Coolify (rebuild completo).
